@@ -133,4 +133,39 @@ def select_nurs():
 
     csvfile.close()
 
-select_nurs()
+
+def compare_royal_library_eisbn():
+    rl_work_book_dir = '../non_disclosed/'
+    rl_work_book_extension = '.xls'
+    rl_work_book_name = 'KB Kopie van CB-ebooks per uitgever -20161031'
+    rl_isbn_column = 2
+
+    work_book = xlrd.open_workbook( rl_work_book_dir + rl_work_book_name + rl_work_book_extension )
+    sheet = work_book.sheet_by_name( 'Blad1' )
+    rl_eisbns = []
+    for cell in sheet.col( rl_isbn_column ):
+        if isinstance( cell.value, float ):
+            rl_eisbns.append( '%d' % cell.value )
+
+    nur_isbns = []
+    with open( '../non_disclosed/royal_nurs.csv', 'w' ) as csv_outfile:
+        fieldnames = [ 'ISBN', 'Titel', 'Auteur', 'Sales 2010-2016' ]
+        csv_writer = csv.writer(csv_outfile, delimiter=',' )
+        csv_writer.writerow( fieldnames )
+
+        with open( '../non_disclosed/nurs.csv', 'r' ) as csv_infile:
+            csv_reader = csv.reader( csv_infile, delimiter=',', quotechar='"')
+            for row in csv_reader:
+                if row[1] in rl_eisbns:
+                    total_sales = 0
+                    for column_index in range( 4, 11 ):
+                        # Some sale numbers are given as e.g. 456.0
+                        # hence: int(float(number)), or it errors out the int()
+                        total_sales += int( float( row[ column_index ] ) )
+                    csv_writer.writerow( [ row[1], row[2], row[3], total_sales ] )
+
+        csv_infile.close()
+    csv_outfile.close()
+
+#select_nurs()
+compare_royal_library_eisbn()
