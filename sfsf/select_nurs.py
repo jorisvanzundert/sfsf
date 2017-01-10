@@ -137,7 +137,7 @@ def select_nurs():
 def compare_royal_library_eisbn():
     rl_work_book_dir = '../non_disclosed/'
     rl_work_book_extension = '.xls'
-    rl_work_book_name = 'KB Kopie van CB-ebooks per uitgever -20161031'
+    rl_work_book_name = 'KB Kopie van CB-ebooks per uitgever -20161228'
     rl_isbn_column = 2
 
     work_book = xlrd.open_workbook( rl_work_book_dir + rl_work_book_name + rl_work_book_extension )
@@ -169,3 +169,4 @@ def compare_royal_library_eisbn():
 
 #select_nurs()
 compare_royal_library_eisbn()
+print( 'done' )
