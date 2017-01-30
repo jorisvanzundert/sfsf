@@ -1,1 +1,6 @@
 BeautifulSoup
+keras
+numpy
+sklearn
+nltk
+theano
