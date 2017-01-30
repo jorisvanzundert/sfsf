@@ -1,2 +1,4 @@
 import sys
-sys.path.append( "../sfsf" )
+import os
+path_to_sfsf = os.path.abspath( os.path.join( os.path.dirname( os.path.abspath( __file__ ) ), os.pardir, 'sfsf' ) )
+sys.path.append( path_to_sfsf )
