@@ -3,6 +3,7 @@ import errno
 import os.path
 import epub
 import lxml
+import sfsf
 from bs4 import BeautifulSoup
 
 class EPubToTxtParser:

@@ -13,7 +13,7 @@ class EpubToTxtParserTest( unittest.TestCase ):
         parser = epub_to_txt_parser.EPubToTxtParser()
         dir_path = os.path.dirname( os.path.realpath(__file__) )
         items = []
-        path_to_nantas = os.path.join( sfsf_config.get_data_dir(), 'epub/9789460422515.epub' )
+        path_to_nantas = os.path.join( sfsf_config.get_data_dir(), 'epub/20150602093137_9789460422515.epub' )
         items = parser.get_linear_items_data( path_to_nantas )
         self.assertEqual( len( items ), 5 )
 
@@ -21,7 +21,7 @@ class EpubToTxtParserTest( unittest.TestCase ):
         parser = epub_to_txt_parser.EPubToTxtParser()
         dir_path = os.path.dirname( os.path.realpath(__file__) )
         items = []
-        path_to_nantas = os.path.join( sfsf_config.get_data_dir(), 'epub/9789460422515.epub' )
+        path_to_nantas = os.path.join( sfsf_config.get_data_dir(), 'epub/20150602093137_9789460422515.epub' )
         items = parser.get_linear_items_data( path_to_nantas )
         narrative = parser.get_narrative( items )
         self.assertEqual( len( narrative ), 3 )
