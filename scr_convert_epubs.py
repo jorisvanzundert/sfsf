@@ -1,7 +1,3 @@
-# Yeah yeah, distutils, I know.. later!
-import sys
-sys.path.append("..")
-
 import csv
 import os
 from sfsf import sfsf_config
