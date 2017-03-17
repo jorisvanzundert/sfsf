@@ -24,18 +24,33 @@ class TrainingDataFactory:
         self.epub_to_txt_parser = epub_to_txt_parser.EPubToTxtParser()
         self.txt_pre_processor = txt_pre_processor.TxtPreProcessor()
 
-    def get_wpg_data( self, wpg_data_file, cull=50 ):
+    def get_isbn_data( self, wpg_data_file ):
+        isbn_data = []
         with open( os.path.join( sfsf_config.get_data_dir(), wpg_data_file ), 'r', encoding="utf-8" ) as csv_infile:
             csv_reader = csv.reader( csv_infile, delimiter=',', quotechar='"')
-            isbn_data = []
             headers = next( csv_reader )
             for row in csv_reader:
                 # select NUR, ISBN, Title, Author, Total sales
                 isbn_data.append( [ row[0], row[1], row[2], row[3], row[11] ] )
             # sort on total copies sold
             isbn_data.sort( key=lambda x: int( x[4] ), reverse=True )
-            top_sellers = isbn_data[:cull]
-            bottom_sellers = isbn_data[-cull:]
+        return isbn_data
+
+    # Just culling wasn't too good an idea, as the bottom is messy (lots of
+    # zero and negative sellers, zero byte files etc.)
+    def get_top_bottom( self, wpg_data_file, cull=50 ):
+        isbn_data = self.get_isbn_data( wpg_data_file )
+        top_sellers = isbn_data[:cull]
+        bottom_sellers = isbn_data[-cull:]
+        return ( top_sellers, bottom_sellers )
+
+    def get_top_bottom_by_indices( self, wpg_data_file, indices=( 0, 10, -10, None ) ):
+        isbn_data = self.get_isbn_data( wpg_data_file )
+        last_index = indices[3]
+        if last_index == None:
+            last_index = len(isbn_data)
+        top_sellers = isbn_data[ indices[0]:indices[1] ]
+        bottom_sellers = isbn_data[ indices[2]:last_index ]
         return ( top_sellers, bottom_sellers )
 
     # Finds file name in epub directory matching isbn. This ignores the fact
@@ -64,7 +79,7 @@ class TrainingDataFactory:
     def sample_txts( self, isbn_data, sample_size ):
         samples = []
         for isbn_info in isbn_data:
-            txt_file = open( os.path.join( sfsf_config.get_txt_dir(),  '{i}.txt'.format( i=isbn_info[1])  ), 'r' )
+            txt_file = open( os.path.join( sfsf_config.get_txt_dir(),  '{i}.txt'.format( i=isbn_info[1])  ), 'r', encoding='utf-8' )
             narrative_text = txt_file.read()
             txt_file.close()
             print( isbn_info[1], ':' , end=' ' )
@@ -77,7 +92,15 @@ class TrainingDataFactory:
         return samples
 
     def create( self, wpg_data_file, cull=50, sample_size=1000, source=sfsf_config.EPUB ):
-        top_sellers, bottom_sellers = self.get_wpg_data( wpg_data_file, cull )
+        top, bottom = self.get_top_bottom( wpg_data_file, cull )
+        return self.delegate_create( top, bottom, sample_size, source )
+
+    def create_by_indices( self, wpg_data_file, indices=( 0, 10, -10, -1 ), sample_size=1000, source=sfsf_config.EPUB ):
+        top, bottom = self.get_top_bottom_by_indices( wpg_data_file, indices )
+        return self.delegate_create( top, bottom, sample_size, source )
+
+    def delegate_create( self, top, bottom, sample_size=1000, source=sfsf_config.EPUB ):
+        top_sellers, bottom_sellers = top, bottom
         if source == sfsf_config.EPUB:
             training_samples_top = self.sample_epubs( top_sellers, sample_size )
             training_samples_bottom = self.sample_epubs( bottom_sellers, sample_size )

@@ -1,5 +1,8 @@
+import os
 import numpy
+from sfsf import sfsf_config
 from keras.models import Sequential
+from keras.models import load_model
 from keras.layers import Dense
 
 class NoDeepLearningModelError( Exception ):
@@ -27,7 +30,7 @@ class DeepLearningModel:
         numpy.random.seed( seed )
         # create model
         self.model = Sequential()
-        self.model.add( Dense( 12, input_dim=self.x_dim, init='uniform', activation='relu' ) )
+        self.model.add( Dense( 12, input_dim=self.x_dim, init='uniform', activation='relu', name='primary_input' ) )
         self.model.add( Dense( neurons_hidden_layer, init='uniform', activation='relu' ) )
         self.model.add( Dense( 1, init='uniform', activation='sigmoid' ) )
         # Compile model
@@ -54,8 +57,10 @@ class DeepLearningModel:
         else:
             raise NoDeepLearningModelError
 
-    def save( self, file_path ):
-        raise NotImplementedError
+    def save( self, name ):
+        self.model.save( os.path.join( sfsf_config.get_data_dir(), '{n}.h5'.format( n=name  ) ) )
 
-    def load( self, file_path ):
-        raise NotImplementedError
+    def load( self, name ):
+        del self.model
+        self.model = load_model( os.path.join( sfsf_config.get_data_dir(), '{n}.h5'.format( n=name  ) ) )
+        self.x_dim = self.model.get_layer( 'primary_input' ).input_shape[1]

@@ -21,6 +21,7 @@ RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
 RUN python3 -m nltk.downloader -d /usr/local/share/nltk_data punkt
 USER root
+RUN export PYTHONIOENCODING=utf-8
 RUN chown -R sfsfuser:users /home/sfsfuser/sfsf
 USER sfsfuser
 WORKDIR /home/sfsfuser
