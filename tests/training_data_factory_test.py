@@ -65,7 +65,7 @@ class TrainingDataFactoryTest( unittest.TestCase ):
                 text = text_preprocessor.transform( text )
                 tmp_txt_file_name = os.path.join( sfsf_config.get_txt_dir(), '{i}.txt'.format( i=row[1] ) )
                 tmp_txt_files.append( tmp_txt_file_name )
-                txt_file = open( tmp_txt_file_name, 'w' )
+                txt_file = open( tmp_txt_file_name, 'w', encoding='utf-8' )
                 txt_file.write( text )
                 txt_file.close()
                 print( row[1] )
