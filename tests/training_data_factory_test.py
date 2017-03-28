@@ -44,7 +44,12 @@ class TrainingDataFactoryTest( unittest.TestCase ):
         isbn_info = [ [ '', 9789023449416, '' ] ]
         training_data = training_data_factory.TrainingDataFactory()
         samples = training_data.sample_epubs( isbn_info, 1000 )
-        self.assertEqual( 72, len( samples) )
+        # expect a tuple (isbn, list of strings)
+        self.assertEqual( 1, len( samples ) )
+        self.assertEqual( 9789023449416, samples[0][0] )
+        self.assertEqual( 72, len( samples[0][1] ) )
+        for sample in samples[0][1]:
+            self.assertEqual( str, type( sample ) )
 
     def test_create_training_data( self ):
         training_data = training_data_factory.TrainingDataFactory()
@@ -74,6 +79,7 @@ class TrainingDataFactoryTest( unittest.TestCase ):
             os.remove( file_name )
         self.assertEqual( ( 253, 21627 ), training_result['x'].shape )
         self.assertEqual( ( 253, ), training_result['y'].shape )
+        self.assertEqual( 253, len( training_result['isbns'] ) )
 
 if __name__ == '__main__':
     unittest.main()

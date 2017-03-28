@@ -72,8 +72,7 @@ class TrainingDataFactory:
         samples = []
         for isbn_info in isbn_data:
             narrative_text = self.convert_to_text( isbn_info[1] )
-            print( isbn_info[1], ':', end=' ' )
-            samples.extend( self.sample_string( narrative_text, sample_size ) )
+            samples.append( self.sample_string( isbn_info[1], narrative_text, sample_size ) )
         return samples
 
     def sample_txts( self, isbn_data, sample_size ):
@@ -82,13 +81,12 @@ class TrainingDataFactory:
             txt_file = open( os.path.join( sfsf_config.get_txt_dir(),  '{i}.txt'.format( i=isbn_info[1])  ), 'r', encoding='utf-8' )
             narrative_text = txt_file.read()
             txt_file.close()
-            print( isbn_info[1], ':' , end=' ' )
-            samples.extend( self.sample_string( narrative_text, sample_size ) )
+            samples.append( self.sample_string( isbn_info[1], narrative_text, sample_size ) )
         return samples
 
-    def sample_string( self, string, sample_size ):
-        samples = re.findall( '(?:[^\s]+\s+){{{s}}}'.format( s = sample_size ), string )
-        print( '{n} samples extracted'.format( n = len( samples ) ) )
+    def sample_string( self, isbn_info, string, sample_size ):
+        samples = ( isbn_info, re.findall( '(?:[^\s]+\s+){{{s}}}'.format( s = sample_size ), string ) )
+        print( '{i}: {n} samples extracted'.format( i = isbn_info, n = len( samples[1] ) ) )
         return samples
 
     def create( self, wpg_data_file, cull=50, sample_size=1000, source=sfsf_config.EPUB ):
@@ -102,11 +100,14 @@ class TrainingDataFactory:
     def delegate_create( self, top, bottom, sample_size=1000, source=sfsf_config.EPUB ):
         top_sellers, bottom_sellers = top, bottom
         if source == sfsf_config.EPUB:
-            training_samples_top = self.sample_epubs( top_sellers, sample_size )
-            training_samples_bottom = self.sample_epubs( bottom_sellers, sample_size )
+            training_data_top = self.sample_epubs( top_sellers, sample_size )
+            training_data_bottom = self.sample_epubs( bottom_sellers, sample_size )
         else:
-            training_samples_top = self.sample_txts( top_sellers, sample_size )
-            training_samples_bottom = self.sample_txts( bottom_sellers, sample_size )
+            training_data_top = self.sample_txts( top_sellers, sample_size )
+            training_data_bottom = self.sample_txts( bottom_sellers, sample_size )
+        training_samples_top = [ sample for training_data in training_data_top for sample in training_data[1] ]
+        training_samples_bottom = [ sample for training_data in training_data_bottom for sample in training_data[1] ]
+        isbns = [ training_data[0] for training_data in training_data_top for sample in training_data[1] ] + [ training_data[0] for training_data in training_data_bottom for sample in training_data[1] ]
         y_narr = numpy.array( [1] * len( training_samples_top ) + [0] * len( training_samples_bottom ) )
         vect = TfidfVectorizer( tokenizer = MorePunctuationTokenizer() )
         x_tdm = vect.fit_transform( training_samples_top + training_samples_bottom )
@@ -114,4 +115,4 @@ class TrainingDataFactory:
         print( 'x shape', ':', x_tdm.shape )
         print( 'y shape', ':', y_narr.shape )
         # TODO: make a nicer return structure
-        return { 'x': x_tdm, 'y': y_narr, 'vectorizer': vect }
+        return { 'x': x_tdm, 'y': y_narr, 'vectorizer': vect, 'isbns': isbns }

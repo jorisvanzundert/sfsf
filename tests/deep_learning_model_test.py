@@ -41,7 +41,8 @@ class DeepLearningModelTest( unittest.TestCase ):
         accuracy = model.build( ( training_data['x'], training_data['y'] ), 10, 5 )
         vect = training_data['vectorizer']
         isbn_info = [ [ '', 9789023449416, '' ] ]
-        test_samples = factory.sample_epubs( isbn_info, 1000 )[-4:]
+        test_tuples = factory.sample_epubs( isbn_info, 1000 )[-4:]
+        test_samples = [ test_sample for tupel in test_tuples for test_sample in tupel[1] ]
         test_tdm = vect.transform( test_samples )
         predictions = model.predict( numpy.array( test_tdm.toarray() ) )
         for idx, prediction in enumerate( predictions ):
@@ -57,7 +58,8 @@ class DeepLearningModelTest( unittest.TestCase ):
         del model
         vect = training_data['vectorizer']
         isbn_info = [ [ '', 9789023449416, '' ] ]
-        test_samples = factory.sample_epubs( isbn_info, 1000 )[-4:]
+        test_tuples = factory.sample_epubs( isbn_info, 1000 )[-4:]
+        test_samples = [ test_sample for tupel in test_tuples for test_sample in tupel[1] ]
         test_tdm = vect.transform( test_samples )
         model = deep_learning_model.DeepLearningModel()
         model.load( 'test_save_load_model' )
