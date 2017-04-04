@@ -71,6 +71,7 @@ class TrainingDataFactory:
     def sample_epubs( self, isbn_data, sample_size ):
         samples = []
         for isbn_info in isbn_data:
+            print( len(samples), end=' ' )
             narrative_text = self.convert_to_text( isbn_info[1] )
             samples.append( self.sample_string( isbn_info[1], narrative_text, sample_size ) )
         return samples
@@ -78,6 +79,7 @@ class TrainingDataFactory:
     def sample_txts( self, isbn_data, sample_size ):
         samples = []
         for isbn_info in isbn_data:
+            print( len(samples), end=' ' )
             txt_file = open( os.path.join( sfsf_config.get_txt_dir(),  '{i}.txt'.format( i=isbn_info[1])  ), 'r', encoding='utf-8' )
             narrative_text = txt_file.read()
             txt_file.close()
