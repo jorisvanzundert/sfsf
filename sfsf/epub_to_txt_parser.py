@@ -32,6 +32,8 @@ class EPubToTxtParser:
         for data in book_narrative:
             soup = BeautifulSoup( data, "lxml" )
             paragraphs = soup.find_all( 'p' )
+            # Thanks to Eric Storms for finding the solution
+            # to some 0kB parse results…
             if paragraphs == []:
                paragraphs = soup.find_all( 'div' )
             for paragraph in paragraphs:
