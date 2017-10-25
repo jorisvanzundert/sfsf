@@ -6,6 +6,7 @@ RUN grep -v '^#' /etc/apt/sources.list
 RUN apt-get update
 RUN apt-get -y install python3-pip
 RUN apt-get -y install libxml2-dev libxslt1-dev python-dev zlib1g-dev
+RUN apt-get -y install vim 
 # RUN apt-get -y install libopenblas-dev python-nose g++  git
 RUN useradd -ms /bin/bash sfsfuser
 RUN cd /home/sfsfuser
