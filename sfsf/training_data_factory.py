@@ -26,7 +26,7 @@ class TrainingDataFactory:
 
     def get_isbn_data( self, wpg_data_file ):
         isbn_data = []
-        with open( os.path.join( sfsf_config.get_data_dir(), wpg_data_file ), 'r', encoding="utf-8" ) as csv_infile:
+        with open(os.path.join(sfsf_config.get_data_dir(), wpg_data_file), 'r', encoding="ISO-8859-1") as csv_infile:
             csv_reader = csv.reader( csv_infile, delimiter=',', quotechar='"')
             headers = next( csv_reader )
             for row in csv_reader:
@@ -71,7 +71,6 @@ class TrainingDataFactory:
     def sample_epubs( self, isbn_data, sample_size ):
         samples = []
         for isbn_info in isbn_data:
-            print( len(samples), end=' ' )
             narrative_text = self.convert_to_text( isbn_info[1] )
             samples.append( self.sample_string( isbn_info[1], narrative_text, sample_size ) )
         return samples
@@ -79,21 +78,27 @@ class TrainingDataFactory:
     def sample_txts( self, isbn_data, sample_size ):
         samples = []
         for isbn_info in isbn_data:
-            print( len(samples), end=' ' )
-            txt_file = open( os.path.join( sfsf_config.get_txt_dir(),  '{i}.txt'.format( i=isbn_info[1])  ), 'r', encoding='utf-8' )
-            narrative_text = txt_file.read()
-            txt_file.close()
-            samples.append( self.sample_string( isbn_info[1], narrative_text, sample_size ) )
+            try:
+                    txt_file = open( os.path.join( sfsf_config.get_txt_dir(),  '{i}.txt'.format( i=isbn_info[1])  ), 'r', encoding='utf-8', errors='ignore' )
+                    narrative_text = txt_file.read()
+                    txt_file.close()
+                    samples.append( self.sample_string( isbn_info[1], narrative_text, sample_size ) )
+            except FileNotFoundError:
+                print("Skipping ISBN {0}".format(isbn_info[1]))
         return samples
 
     def sample_string( self, isbn_info, string, sample_size ):
-        samples = ( isbn_info, re.findall( '(?:[^\s]+\s+){{{s}}}'.format( s = sample_size ), string ) )
-        print( '{i}: {n} samples extracted'.format( i = isbn_info, n = len( samples[1] ) ) )
+        tokens = re.split("\s+", string)
+        num_samples = int(len(tokens)/sample_size) + 1
+        samples = (isbn_info, [" ".join(tokens[i*sample_size:(i+1)*sample_size]) for i in range(0, num_samples)])
         return samples
 
     def create( self, wpg_data_file, cull=50, sample_size=1000, source=sfsf_config.EPUB ):
         top, bottom = self.get_top_bottom( wpg_data_file, cull )
         return self.delegate_create( top, bottom, sample_size, source )
+
+    def create_by_sample(self, wpg_data_file, top_sample, bottom_sample, sample_size=1000, source=sfsf_config.EPUB ):
+        return self.delegate_create( top_sample, bottom_sample, sample_size, source )
 
     def create_by_indices( self, wpg_data_file, indices=( 0, 10, -10, -1 ), sample_size=1000, source=sfsf_config.EPUB ):
         top, bottom = self.get_top_bottom_by_indices( wpg_data_file, indices )
