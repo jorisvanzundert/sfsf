@@ -1,6 +1,6 @@
 import os
 
-PRODUCTION = 'production'
+PRODUCTION = 'merged-corpus'
 DEVELOPMENT = 'test'
 ENVIRONMENT = PRODUCTION
 EPUB = 'epub'
@@ -17,7 +17,7 @@ def get_data_dir():
     if ENVIRONMENT == DEVELOPMENT:
         data_dir = os.path.join(  path_to_here, '../data/{t}'.format( t=DEVELOPMENT ) )
     else:
-        data_dir = os.path.join( path_to_here, '../data/{p}'.format( p=PRODUCTION ) )
+        data_dir = os.path.join( path_to_here, '../../docker_volume/{p}'.format( p=PRODUCTION ) )
     return data_dir
 
 def get_epub_dir():
